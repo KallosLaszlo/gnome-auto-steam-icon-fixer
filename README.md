@@ -17,14 +17,9 @@ The `auto-steam-icon-fixer` is a Bash script designed to automate the process of
    cd gnome-auto-steam-icon-fixer
    ```
 
-2. Make the script executable:
+2. Run the script:
    ```
-   chmod +x scripts/auto_steam_icon_fixer.sh
-   ```
-
-3. Run the script:
-   ```
-   ./scripts/auto_steam_icon_fixer.sh
+   bash ./scripts/auto_steam_icon_fixer.sh
    ```
 
    During installation, you will be prompted to enable GNOME notifications for patched `.desktop` files. Press `Enter` to accept the default (`yes`) or type `n` to disable notifications.
