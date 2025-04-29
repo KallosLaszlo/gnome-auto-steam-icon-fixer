@@ -32,6 +32,11 @@ install_inotify_tools() {
 # Install inotify-tools if not already installed
 install_inotify_tools
 
+# Prompt user for GNOME notifications preference
+echo "Do you want to receive GNOME notifications for patched Steam desktop files? [Y/n]"
+read -r enable_notifications
+enable_notifications=${enable_notifications:-Y}
+
 # Create necessary directories
 echo "Creating necessary directories..."
 mkdir -p ~/.local/bin
@@ -39,29 +44,37 @@ mkdir -p ~/.config/systemd/user
 
 # Create the fix_steam_desktops.sh script
 echo "Creating the fix_steam_desktops.sh script..."
-cat << 'EOF' > ~/.local/bin/fix_steam_desktops.sh
+cat << EOF > ~/.local/bin/fix_steam_desktops.sh
 #!/bin/bash
 
-APP_DIR="$HOME/.local/share/applications"
+APP_DIR="\$HOME/.local/share/applications"
 
 # Only proceed if new files contain Steam icons
-while inotifywait -q -e create,modify "$APP_DIR"; do
-  find "$APP_DIR" -type f -name "*.desktop" | while read -r f; do
+while inotifywait -q -e create,modify "\$APP_DIR"; do
+  find "\$APP_DIR" -type f -name "*.desktop" | while read -r f; do
     # Only process files that contain Steam icons
-    grep -q '^Icon=steam_icon_' "$f" || continue
+    grep -q '^Icon=steam_icon_' "\$f" || continue
 
     # Skip files that already have a StartupWMClass field
-    grep -q '^StartupWMClass=' "$f" && continue
+    grep -q '^StartupWMClass=' "\$f" && continue
 
-    GAME_ID=$(grep '^Icon=steam_icon_' "$f" | sed 's/Icon=steam_icon_//')
-    WM_CLASS="steam_app_${GAME_ID}"
+    GAME_ID=\$(grep '^Icon=steam_icon_' "\$f" | sed 's/Icon=steam_icon_//')
+    WM_CLASS="steam_app_\${GAME_ID}"
 
     # Add the StartupWMClass field
-    echo "Patching $f with StartupWMClass=$WM_CLASS"
-    echo "StartupWMClass=$WM_CLASS" >> "$f"
+    echo "Patching \$f with StartupWMClass=\$WM_CLASS"
+    echo "StartupWMClass=\$WM_CLASS" >> "\$f"
 
+EOF
+
+if [[ "\$enable_notifications" =~ ^[Yy]$ ]]; then
+  cat << 'EOF' >> ~/.local/bin/fix_steam_desktops.sh
     # GNOME notification
-    notify-send "Steam Desktop File Patched" "Patched $f with StartupWMClass=$WM_CLASS"
+    notify-send "Steam Desktop File Patched" "Patched \$f with StartupWMClass=\$WM_CLASS"
+EOF
+fi
+
+cat << 'EOF' >> ~/.local/bin/fix_steam_desktops.sh
   done
 done
 EOF
@@ -99,6 +112,11 @@ echo "Reloading and restarting systemd configurations..."
 systemctl --user daemon-reload
 systemctl --user enable --now fix-steam-desktops.path
 systemctl --user restart fix-steam-desktops.path
+
+# Notify user of successful setup if notifications are enabled
+if [[ "$enable_notifications" =~ ^[Yy]$ ]]; then
+  notify-send "Setup Complete" "The system is now set up to automatically fix Steam desktop files as they are created or modified."
+fi
 
 # Done
 echo "Setup complete. The system is now set up to automatically fix Steam desktop files as they are created or modified."
