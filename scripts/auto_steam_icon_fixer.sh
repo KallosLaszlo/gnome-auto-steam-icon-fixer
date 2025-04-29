@@ -1,0 +1,104 @@
+#!/bin/bash
+
+# Function to install inotify-tools
+install_inotify_tools() {
+  echo "Checking for inotify-tools..."
+  if ! command -v inotifywait &> /dev/null; then
+    echo "inotifywait is not installed. Attempting to install inotify-tools..."
+    if command -v apt &> /dev/null; then
+      sudo apt update && sudo apt install -y inotify-tools
+    elif command -v dnf &> /dev/null; then
+      sudo dnf install -y inotify-tools
+    elif command -v pacman &> /dev/null; then
+      sudo pacman -Sy --noconfirm inotify-tools
+    elif command -v zypper &> /dev/null; then
+      sudo zypper install -y inotify-tools
+    else
+      echo "Error: Could not detect package manager. Please install inotify-tools manually."
+      exit 1
+    fi
+
+    if ! command -v inotifywait &> /dev/null; then
+      echo "Error: Failed to install inotify-tools. Please install it manually."
+      exit 1
+    fi
+
+    echo "inotify-tools installed successfully."
+  else
+    echo "inotify-tools is already installed."
+  fi
+}
+
+# Install inotify-tools if not already installed
+install_inotify_tools
+
+# Create necessary directories
+echo "Creating necessary directories..."
+mkdir -p ~/.local/bin
+mkdir -p ~/.config/systemd/user
+
+# Create the fix_steam_desktops.sh script
+echo "Creating the fix_steam_desktops.sh script..."
+cat << 'EOF' > ~/.local/bin/fix_steam_desktops.sh
+#!/bin/bash
+
+APP_DIR="$HOME/.local/share/applications"
+
+# Only proceed if new files contain Steam icons
+while inotifywait -q -e create,modify "$APP_DIR"; do
+  find "$APP_DIR" -type f -name "*.desktop" | while read -r f; do
+    # Only process files that contain Steam icons
+    grep -q '^Icon=steam_icon_' "$f" || continue
+
+    # Skip files that already have a StartupWMClass field
+    grep -q '^StartupWMClass=' "$f" && continue
+
+    GAME_ID=$(grep '^Icon=steam_icon_' "$f" | sed 's/Icon=steam_icon_//')
+    WM_CLASS="steam_app_${GAME_ID}"
+
+    # Add the StartupWMClass field
+    echo "Patching $f with StartupWMClass=$WM_CLASS"
+    echo "StartupWMClass=$WM_CLASS" >> "$f"
+
+    # GNOME notification
+    notify-send "Steam Desktop File Patched" "Patched $f with StartupWMClass=$WM_CLASS"
+  done
+done
+EOF
+
+# Make the script executable
+chmod +x ~/.local/bin/fix_steam_desktops.sh
+
+# Create the systemd path unit file
+echo "Creating systemd path unit..."
+cat << 'EOF' > ~/.config/systemd/user/fix-steam-desktops.path
+[Unit]
+Description=Watch for new or modified Steam .desktop files and fix StartupWMClass
+
+[Path]
+PathModified=%h/.local/share/applications/
+PathChanged=%h/.local/share/applications/
+
+[Install]
+WantedBy=default.target
+EOF
+
+# Create the systemd service unit file
+echo "Creating systemd service unit..."
+cat << 'EOF' > ~/.config/systemd/user/fix-steam-desktops.service
+[Unit]
+Description=Fix Steam-generated .desktop files with missing StartupWMClass
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/fix_steam_desktops.sh
+EOF
+
+# Reload and restart systemd configurations
+echo "Reloading and restarting systemd configurations..."
+systemctl --user daemon-reload
+systemctl --user enable --now fix-steam-desktops.path
+systemctl --user restart fix-steam-desktops.path
+
+# Done
+echo "Setup complete. The system is now set up to automatically fix Steam desktop files as they are created or modified."
