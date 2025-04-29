@@ -7,6 +7,8 @@ The `auto-steam-icon-fixer` is a Bash script designed to automate the process of
 - Installs `inotify-tools` if not already present.
 - Monitors the Steam applications directory for changes.
 - Automatically adds the `StartupWMClass` field to `.desktop` files that contain Steam icons.
+- Option to enable GNOME notifications for patched files.
+- Notifies the user of successful installation if notifications are enabled.
 
 ## Installation
 1. Clone the repository:
@@ -25,8 +27,12 @@ The `auto-steam-icon-fixer` is a Bash script designed to automate the process of
    ./scripts/auto_steam_icon_fixer.sh
    ```
 
+   During installation, you will be prompted to enable GNOME notifications for patched `.desktop` files. Press `Enter` to accept the default (`yes`) or type `n` to disable notifications.
+
 ## Usage
 Once the script is executed, it will set up a systemd service that monitors the `~/.local/share/applications/` directory. Whenever a new `.desktop` file is created or modified, the script will automatically check for the presence of a Steam icon and add the appropriate `StartupWMClass` field if it is missing.
+
+If GNOME notifications are enabled, you will receive a notification each time a `.desktop` file is patched. Additionally, a notification will be displayed at the end of the installation process to confirm successful setup.
 
 ## License
 This project is licensed under the MIT License. See the `LICENSE` file for more details.
