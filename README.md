@@ -11,8 +11,8 @@ The `auto-steam-icon-fixer` is a Bash script designed to automate the process of
 ## Installation
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/auto-steam-icon-fixer.git
-   cd auto-steam-icon-fixer
+   git clone https://github.com/KallosLaszlo/gnome-auto-steam-icon-fixer.git
+   cd gnome-auto-steam-icon-fixer
    ```
 
 2. Make the script executable:
