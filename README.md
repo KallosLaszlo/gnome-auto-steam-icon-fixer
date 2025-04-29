@@ -24,10 +24,29 @@ The `auto-steam-icon-fixer` is a Bash script designed to automate the process of
 
    During installation, you will be prompted to enable GNOME notifications for patched `.desktop` files. Press `Enter` to accept the default (`yes`) or type `n` to disable notifications.
 
+## Files Created
+The script creates the following files and directories:
+- `~/.local/bin/fix_steam_desktops.sh`: The main script that monitors and patches `.desktop` files.
+- `~/.config/systemd/user/fix-steam-desktops.path`: A systemd path unit file to monitor changes in the `~/.local/share/applications/` directory.
+- `~/.config/systemd/user/fix-steam-desktops.service`: A systemd service unit file to execute the patching script when triggered by the path unit.
+
 ## Usage
 Once the script is executed, it will set up a systemd service that monitors the `~/.local/share/applications/` directory. Whenever a new `.desktop` file is created or modified, the script will automatically check for the presence of a Steam icon and add the appropriate `StartupWMClass` field if it is missing.
 
 If GNOME notifications are enabled, you will receive a notification each time a `.desktop` file is patched. Additionally, a notification will be displayed at the end of the installation process to confirm successful setup.
+
+## Advanced Users
+For advanced users who want to understand or customize the setup:
+1. The script installs `inotify-tools` if not already present. You can skip this step if you already have it installed.
+2. The main patching script is located at `~/.local/bin/fix_steam_desktops.sh`. You can edit this file to modify the behavior of the patching process.
+3. The systemd path unit (`~/.config/systemd/user/fix-steam-desktops.path`) monitors the `~/.local/share/applications/` directory for changes. You can adjust the `PathModified` or `PathChanged` fields if needed.
+4. The systemd service unit (`~/.config/systemd/user/fix-steam-desktops.service`) executes the patching script. You can modify the `ExecStart` field to point to a different script or add additional options.
+5. To manually reload and restart the systemd configurations:
+   ```
+   systemctl --user daemon-reload
+   systemctl --user enable --now fix-steam-desktops.path
+   systemctl --user restart fix-steam-desktops.path
+   ```
 
 ## License
 This project is licensed under the MIT License. See the `LICENSE` file for more details.
