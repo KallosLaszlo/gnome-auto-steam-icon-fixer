@@ -32,6 +32,15 @@ install_inotify_tools() {
 # Install inotify-tools if not already installed
 install_inotify_tools
 
+# Detect if the system is running Wayland
+#is_wayland() {
+#  if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+#    return 0
+#  else
+#    return 1
+#  fi
+#}
+
 # Prompt user for GNOME notifications preference
 echo "Do you want to receive GNOME notifications for patched Steam desktop files? [Y/n]"
 read -r enable_notifications
@@ -49,6 +58,17 @@ cat << EOF > ~/.local/bin/fix_steam_desktops.sh
 
 APP_DIR="\$HOME/.local/share/applications"
 
+# Function to update window title on Wayland
+update_wayland_window_title() {
+  local game_id="\$1"
+  local desktop_name="\$2"
+  local window_title="steam_app_\${game_id}"
+
+  # Use xdg-activation or other Wayland-compatible tools to update the title
+  echo "Wayland detected. Updating window title for \$window_title to \$desktop_name"
+  # Placeholder for Wayland-specific title update logic
+}
+
 # Only proceed if new files contain Steam icons
 while inotifywait -q -e create,modify "\$APP_DIR"; do
   find "\$APP_DIR" -type f -name "*.desktop" | while read -r f; do
@@ -60,10 +80,16 @@ while inotifywait -q -e create,modify "\$APP_DIR"; do
 
     GAME_ID=\$(grep '^Icon=steam_icon_' "\$f" | sed 's/Icon=steam_icon_//')
     WM_CLASS="steam_app_\${GAME_ID}"
+    DESKTOP_NAME=\$(basename "\$f" .desktop)
 
     # Add the StartupWMClass field
     echo "Patching \$f with StartupWMClass=\$WM_CLASS"
     echo "StartupWMClass=\$WM_CLASS" >> "\$f"
+
+    # Handle Wayland-specific window title updates
+    if [ "\$XDG_SESSION_TYPE" = "wayland" ]; then
+      update_wayland_window_title "\$GAME_ID" "\$DESKTOP_NAME"
+    fi
 
 EOF
 
