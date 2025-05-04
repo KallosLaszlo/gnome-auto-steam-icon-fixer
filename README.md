@@ -9,7 +9,7 @@ The `gnome-auto-steam-icon-fixer` is a Bash script designed to automate the proc
 - Automatically adds the `StartupWMClass` field to `.desktop` files that contain Steam icons.
 - Option to enable GNOME notifications for patched files.
 - Notifies the user of successful installation if notifications are enabled.
-- Detects if the system is running Wayland and updates the window title dynamically for Steam games.
+- Detects if the system is running Wayland and includes a placeholder for dynamically updating the window title for Steam games.
 
 ## Installation
 1. Clone the repository:
@@ -37,7 +37,9 @@ Once the script is executed, it will set up a systemd service that monitors the 
 If GNOME notifications are enabled, you will receive a notification each time a `.desktop` file is patched. Additionally, a notification will be displayed at the end of the installation process to confirm successful setup.
 
 ### Wayland-Specific Behavior
-If the system is running Wayland (detected via the `XDG_SESSION_TYPE` environment variable), the script will attempt to dynamically update the window title for Steam games. The window title, which defaults to `steam_app_<Steam ID>`, will be updated to match the `.desktop` file name. This ensures that the correct game name is displayed in `alt+tab` and other window switchers.
+If the system is running Wayland (detected via the `XDG_SESSION_TYPE` environment variable), the script includes a placeholder function for dynamically updating the window title for Steam games. The window title, which defaults to `steam_app_<Steam ID>`, can be updated to match the `.desktop` file name. This ensures that the correct game name is displayed in `alt+tab` and other window switchers.
+
+The placeholder implementation logs the intended behavior and can be extended in the future if specific Wayland tools or APIs are required to achieve this functionality.
 
 ## Advanced Users
 For advanced users who want to understand or customize the setup:
