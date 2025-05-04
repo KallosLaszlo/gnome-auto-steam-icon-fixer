@@ -67,6 +67,7 @@ update_wayland_window_title() {
   # Use xdg-activation or other Wayland-compatible tools to update the title
   echo "Wayland detected. Updating window title for \$window_title to \$desktop_name"
   # Placeholder for Wayland-specific title update logic
+  # Feature implementation would depend on the specific Wayland compositor and tools available if needed...
 }
 
 # Only proceed if new files contain Steam icons
@@ -87,9 +88,9 @@ while inotifywait -q -e create,modify "\$APP_DIR"; do
     echo "StartupWMClass=\$WM_CLASS" >> "\$f"
 
     # Handle Wayland-specific window title updates
-    if [ "\$XDG_SESSION_TYPE" = "wayland" ]; then
-      update_wayland_window_title "\$GAME_ID" "\$DESKTOP_NAME"
-    fi
+    #if [ "\$XDG_SESSION_TYPE" = "wayland" ]; then
+    #  update_wayland_window_title "\$GAME_ID" "\$DESKTOP_NAME"
+    #fi
 
 EOF
 
