@@ -45,6 +45,9 @@ install_inotify_tools
 echo "Do you want to receive GNOME notifications for patched Steam desktop files? [Y/n]"
 read -r enable_notifications
 enable_notifications=${enable_notifications:-Y}
+echo "Do you want to hide games in the app menu? [Y/n]"
+read -r hide_icons
+hide_icons=${hide_icons:-Y}
 
 # Create necessary directories
 echo "Creating necessary directories..."
@@ -98,6 +101,13 @@ if [[ "\$enable_notifications" =~ ^[Yy]$ ]]; then
   cat << 'EOF' >> ~/.local/bin/fix_steam_desktops.sh
     # GNOME notification
     notify-send "Steam Desktop File Patched" "Patched \$f with StartupWMClass=\$WM_CLASS"
+EOF
+fi
+
+if [[ "\$hide_icons" =~ ^[Yy]$ ]]; then
+  cat << 'EOF' >> ~/.local/bin/fix_steam_desktops.sh
+    # Hide icons in App menu
+    echo "NoDisplay=True" >> "\$f"
 EOF
 fi
 
