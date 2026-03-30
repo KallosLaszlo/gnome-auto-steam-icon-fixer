@@ -97,17 +97,17 @@ while inotifywait -q -e create,modify "\$APP_DIR"; do
 
 EOF
 
+if [[ "\$hide_icons" =~ ^[Yy]$ ]]; then
+  cat << 'EOF' >> ~/.local/bin/fix_steam_desktops.sh
+    # Hide icons in App menu
+    echo "NoDisplay=true" >> "\$f"
+EOF
+fi
+
 if [[ "\$enable_notifications" =~ ^[Yy]$ ]]; then
   cat << 'EOF' >> ~/.local/bin/fix_steam_desktops.sh
     # GNOME notification
     notify-send "Steam Desktop File Patched" "Patched \$f with StartupWMClass=\$WM_CLASS"
-EOF
-fi
-
-if [[ "\$hide_icons" =~ ^[Yy]$ ]]; then
-  cat << 'EOF' >> ~/.local/bin/fix_steam_desktops.sh
-    # Hide icons in App menu
-    echo "NoDisplay=True" >> "\$f"
 EOF
 fi
 
