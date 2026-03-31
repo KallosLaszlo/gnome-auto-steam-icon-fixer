@@ -73,21 +73,44 @@ update_wayland_window_title() {
   # Feature implementation would depend on the specific Wayland compositor and tools available if needed...
 }
 
-# Only proceed if new files contain Steam icons
+# Watch for new or modified .desktop files
 while inotifywait -q -e create,modify "\$APP_DIR"; do
   find "\$APP_DIR" -type f -name "*.desktop" | while read -r f; do
-    # Only process files that contain Steam icons
-    grep -q '^Icon=steam_icon_' "\$f" || continue
-
     # Skip files that already have a StartupWMClass field
     grep -q '^StartupWMClass=' "\$f" && continue
 
-    GAME_ID=\$(grep '^Icon=steam_icon_' "\$f" | sed 's/Icon=steam_icon_//')
-    WM_CLASS="steam_app_\${GAME_ID}"
+    WM_CLASS=""
+    SOURCE=""
+
+    # Detect Steam .desktop files
+    if grep -q '^Icon=steam_icon_' "\$f"; then
+      GAME_ID=\$(grep '^Icon=steam_icon_' "\$f" | head -1 | sed 's/Icon=steam_icon_//')
+      WM_CLASS="steam_app_\${GAME_ID}"
+      SOURCE="Steam"
+
+    # Detect Lutris .desktop files
+    elif grep -q 'lutris' "\$f" && grep -q '^Exec=.*lutris' "\$f"; then
+      GAME_ID=\$(grep '^Exec=' "\$f" | head -1 | grep -oP 'rungameid/\K[0-9]+')
+      if [ -n "\$GAME_ID" ]; then
+        WM_CLASS="lutris-\${GAME_ID}"
+      else
+        WM_CLASS=\$(basename "\$f" .desktop)
+      fi
+      SOURCE="Lutris"
+
+    # Detect Heroic .desktop files
+    elif grep -q '^Exec=.*heroic' "\$f" || basename "\$f" | grep -q 'heroicgameslauncher'; then
+      WM_CLASS=\$(basename "\$f" .desktop)
+      SOURCE="Heroic"
+    fi
+
+    # Skip if no supported launcher detected
+    [ -z "\$WM_CLASS" ] && continue
+
     DESKTOP_NAME=\$(basename "\$f" .desktop)
 
     # Add the StartupWMClass field
-    echo "Patching \$f with StartupWMClass=\$WM_CLASS"
+    echo "Patching \$f (\$SOURCE) with StartupWMClass=\$WM_CLASS"
     echo "StartupWMClass=\$WM_CLASS" >> "\$f"
 
     # Handle Wayland-specific window title updates
@@ -107,7 +130,7 @@ fi
 if [[ "\$enable_notifications" =~ ^[Yy]$ ]]; then
   cat << 'EOF' >> ~/.local/bin/fix_steam_desktops.sh
     # GNOME notification
-    notify-send "Steam Desktop File Patched" "Patched \$f with StartupWMClass=\$WM_CLASS"
+    notify-send "Desktop File Patched (\$SOURCE)" "Patched \$f with StartupWMClass=\$WM_CLASS"
 EOF
 fi
 
@@ -123,7 +146,7 @@ chmod +x ~/.local/bin/fix_steam_desktops.sh
 echo "Creating systemd path unit..."
 cat << 'EOF' > ~/.config/systemd/user/fix-steam-desktops.path
 [Unit]
-Description=Watch for new or modified Steam .desktop files and fix StartupWMClass
+Description=Watch for new or modified game .desktop files and fix StartupWMClass
 
 [Path]
 PathModified=%h/.local/share/applications/
@@ -137,7 +160,7 @@ EOF
 echo "Creating systemd service unit..."
 cat << 'EOF' > ~/.config/systemd/user/fix-steam-desktops.service
 [Unit]
-Description=Fix Steam-generated .desktop files with missing StartupWMClass
+Description=Fix game launcher .desktop files with missing StartupWMClass
 
 [Service]
 Type=oneshot
