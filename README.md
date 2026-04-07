@@ -75,4 +75,4 @@ Kallos László — laszlo@kallos.dev
 
 If you find this tool useful and want to support its further development, feel free to buy me a coffee!
 
-[![Support me on Ko-fi](https://img.shields.io/badge/Support%20me%20on-Ko--fi-F16061?logo=ko-fi&logoColor=white&style=for-the-badge)](https://ko-fi.com/kalloslaszlo)
+[![Support me on Ko-fi](https://img.shields.io/badge/Support%20me%20on-Ko--fi-F16061?logo=ko-fi&logoColor=white&style=for-the-badge)](https://ko-fi.com/laszlokallos)
