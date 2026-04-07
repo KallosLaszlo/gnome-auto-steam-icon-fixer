@@ -62,3 +62,13 @@ Contributions are welcome! Please feel free to submit a pull request or open an 
 
 ## Acknowledgments
 - Thanks to the developers of `inotify-tools` for providing the necessary tools to monitor file changes.
+- 
+## Author
+
+Kallos László — laszlo@kallos.dev
+
+## Support the Project
+
+If you find this tool useful and want to support its further development, feel free to buy me a coffee!
+
+[![Support me on Ko-fi](https://img.shields.io/badge/Support%20me%20on-Ko--fi-F16061?logo=ko-fi&logoColor=white&style=for-the-badge)](https://ko-fi.com/kalloslaszlo)
