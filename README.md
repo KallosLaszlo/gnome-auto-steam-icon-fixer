@@ -60,9 +60,13 @@ This project is licensed under the MIT License. See the `LICENSE` file for more 
 ## Contributing
 Contributions are welcome! Please feel free to submit a pull request or open an issue for any enhancements or bug fixes.
 
+Special thanks to the following people for their contributions:
+
+* **[@De-Clan-C](https://github.com/De-Clan-C)** - Added option for hiding icons in app menu.
+
 ## Acknowledgments
 - Thanks to the developers of `inotify-tools` for providing the necessary tools to monitor file changes.
-- 
+
 ## Author
 
 Kallos László — laszlo@kallos.dev
